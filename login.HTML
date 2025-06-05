@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - EFAG</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="estilo.css">
+  <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui@5/material-ui.css">
+
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="efag-logo-transparente.png" alt="EFAG Logo" />
+    </div>
+    <h2>Portal do Aluno</h2>
+
+    <form id="loginForm">
+      <div class="input-group">
+        <input type="email" id="username" placeholder="E-mail institucional" />
+        <i class="fa fa-envelope"></i> <!-- Alterei o ícone para o ícone de e-mail -->
+      </div>
+      
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Senha" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        <i class="fa fa-eye" id="togglePassword" onclick="togglePassword()"></i>
+      </div>
+      <button type="submit" id="loginBtn">
+        <span id="btnText">Entrar</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+      <div class="error-message" id="errorMsg">Preencha todos os campos.</div>
+      <div class="extra-links">
+        <a href="#" onclick="abrirModalEsqueciSenha(event)">Esqueci minha senha</a> |
+        <a href="#" onclick="abrirCadastro(event)">Novo cadastro</a>
+      </div>
+    </form>
+
+    <!-- Modal Esqueci a Senha -->
+    <div id="modalEsqueciSenha" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
+      <div style="background:#fff; padding:20px; border-radius:10px; max-width:300px; width:90%; text-align:left; position:relative;">
+        <h3 style="text-align:center; margin-bottom:10px;">Recuperar senha</h3>
+        <form id="recuperarForm">
+          <div class="input-group">
+            <input type="text" name="usuario" placeholder="QRA" required />
+            <i class="fa fa-user"></i>
+          </div>
+          <div class="input-group">
+            <input type="email" name="email" placeholder="E-mail" required />
+            <i class="fa fa-envelope"></i>
+          </div>
+          <button type="submit">Enviar solicitação</button>
+          <p id="recuperarMsg" style="display:none; color:green; font-size:14px; text-align:center; margin-top:10px;">Solicitação enviada com sucesso!</p>
+        </form>
+        <div style="text-align:center; margin-top:10px;">
+          <a href="#" onclick="fecharModalEsqueciSenha(event)" style="font-size:14px;">Fechar</a>
+        </div>
+      </div>
+    </div>
+
+<form id="cadastroForm">
+      <div class="input-group">
+        <input type="text" id="cadNome" placeholder="Nome completo" oninput="this.value=this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g,'')" />
+        <i class="fa fa-id-card"></i>
+      </div>
+      <div class="input-group">
+        <input type="email" id="cadEmail" placeholder="E-mail institucional" />
+        <i class="fa fa-envelope"></i>
+      </div>
+     
+      
+      <div class="input-group">
+        <input type="text" id="cadUsuario" placeholder="QRA" />
+        <i class="fa fa-user"></i>
+      </div>
+      <div class="input-group">
+        <input type="password" id="cadSenha" placeholder="Senha" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        <i class="fa fa-eye" onclick="togglePassword(this, 'cadSenha')"></i>
+      </div>
+      <span id="senhaAviso" style="display:none; font-size: 12px; color: #888;">A senha deve conter 6 dígitos.</span>
+      
+      <div class="input-group">
+        <input type="text" id="cadPelotao" placeholder="Pelotão" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        <i class="fa fa-users"></i>
+      </div>
+      <button type="submit" id="cadastroBtn">Enviar cadastro</button>
+      <div class="success-message" id="cadastroSuccess">Cadastro enviado com sucesso! Aguarde aprovação.</div>
+      <div class="extra-links" style="text-align: center; margin-top: 10px;">
+        <a href="#" onclick="voltarLogin(event)">Voltar ao login</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function togglePassword(icon = null, inputId = 'password') {
+      const input = document.getElementById(inputId);
+      const eye = icon || document.getElementById('togglePassword');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+      }
+    }
+
+
+// Função para validar o domínio do e-mail
+function validarDominioEmail(email) {
+  return email.endsWith('@guarulhos.sp.gov.br');
+}
+
+
+    function abrirCadastro(e) {
+      e.preventDefault();
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('cadastroForm').style.display = 'block';
+    }
+
+    function voltarLogin(e) {
+      e.preventDefault();
+      document.getElementById('cadastroForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+    }
+
+["username", "password", "cadNome", "cadEmail", "cadUsuario", "cadSenha", "cadPelotao"].forEach(id => {
+  const input = document.getElementById(id);
+  input.addEventListener("input", function () {
+    // Remove borda vermelha
+    this.classList.remove("input-error");
+    // Remove a mensagem “Campo obrigatório” se existir
+    const erroText = this.parentNode.querySelector('.error-text');
+    if (erroText) erroText.remove();
+  });
+});
+
+
+    function validarDominioEmail(email) {
+  return email.endsWith('@guarulhos.sp.gov.br');
+}
+
+
+  function abrirModalEsqueciSenha(e) {
+  e.preventDefault();
+  document.getElementById("modalEsqueciSenha").style.display = "flex";
+}
+
+function fecharModalEsqueciSenha(e) {
+  e.preventDefault();
+  document.getElementById("modalEsqueciSenha").style.display = "none";
+}
+
+
+</script>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, getDoc,
+  collection, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdiDZNB963EFy6QWl5M-szV199SvQ5r4I",
+    authDomain: "painel-alunos-25f68.firebaseapp.com",
+    projectId: "painel-alunos-25f68",
+    storageBucket: "painel-alunos-25f68.appspot.com",
+    messagingSenderId: "733465490272",
+    appId: "1:733465490272:web:6170d1d78ab955b8cd6405"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  // ─── Recuperar Senha (Esqueci minha senha) ───
+const recuperarForm = document.getElementById("recuperarForm");
+if (recuperarForm) {
+  recuperarForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const usuario = this.usuario.value.trim();
+    const email   = this.email.value.trim();
+    if (!usuario || !email) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Dados incompletos',
+        text: 'Preencha QRA e e-mail antes de enviar.'
+      });
+    }
+    try {
+      // grava pedido em 'solicitacoesRedefinicao'
+      await setDoc(
+        doc(db, "solicitacoesRedefinicao", `${usuario}_${Date.now()}`),
+        {
+          usuario,
+          email,
+          dataSolicitacao: new Date()
+        }
+      );
+      Swal.fire({
+        icon: 'success',
+        title: 'Solicitação enviada!',
+        text: 'Sua senha foi enviada ao seu E-mail de acesso.'
+      });
+      fecharModalEsqueciSenha(e);
+    } catch (error) {
+      console.error("Erro ao enviar solicitação:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Falha no envio',
+        text: 'Tente novamente mais tarde.'
+      });
+    }
+  });
+}
+
+  
+  function validarDominioEmail(email) {
+    return email.endsWith('@guarulhos.sp.gov.br');
+  }
+  
+  // Cadastro de usuário
+  const cadastroForm = document.getElementById("cadastroForm");
+  cadastroForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+  
+    const nome = document.getElementById("cadNome").value.trim();
+    const email = document.getElementById("cadEmail").value.trim();
+    const usuario = document.getElementById("cadUsuario").value.trim();
+    const senha = document.getElementById("cadSenha").value.trim();
+    const pelotao = document.getElementById("cadPelotao").value.trim();
+  
+    const successMsg = document.getElementById("cadastroSuccess");
+    let erro = false;
+  
+    if (!nome) { erro = true; }
+    if (!usuario) { erro = true; }
+    if (!email || !validarDominioEmail(email)) { erro = true; }
+    if (!senha) { erro = true; }
+    if (!pelotao) { erro = true; }
+  
+  if (erro) {
+// Marca os inputs vazios
+[cadNome, cadEmail, cadUsuario, cadSenha, cadPelotao].forEach(input => {
+  if (!input.value.trim()) {
+    input.classList.add('input-error');
+    // Se já não houver mensagem, cria uma nova
+    const existente = input.parentNode.querySelector('.error-text');
+    if (!existente) {
+      const msg = document.createElement('span');
+      msg.className = 'error-text';
+      msg.textContent = 'Campo obrigatório';
+      // insere imediatamente após o input
+      input.insertAdjacentElement('afterend', msg);
+    }
+  }
+});
+
+
+  // Exibe modal sofisticado
+  Swal.fire({
+    icon: 'error',
+    title: 'Ops...',
+    text: 'Preencha todos os campos obrigatórios corretamente.',
+    confirmButtonText: 'Entendi',
+    customClass: {
+      popup: 'swal2-shadow',
+      title: 'swal2-title',
+      confirmButton: 'swal2-confirm'
+    },
+    buttonsStyling: true
+  });
+  return;
+}
+
+  
+    try {
+          // ─── Grava novo pré-cadastro em 'usuariosPendentes' ───
+    await setDoc(
+      doc(db, "usuariosPendentes", email),
+      {
+        nome:          nome,
+        usuario:       usuario,
+        email:         email,
+        senha:         senha,
+        pelotaoAluno:  pelotao,
+        status:        "pendente",
+        criadoEm:      new Date()
+      }
+    );
+
+
+  
+const pendRef = doc(db, "usuariosPendentes", email);
+const pendSnap = await getDoc(pendRef);
+if (pendSnap.exists()) {
+  const data = pendSnap.data();
+  await setDoc(doc(db, "usuarios", email), {
+    nomeCompleto: data.nome,
+    qraAluno:     data.usuario,
+    pelotaoAluno: data.pelotaoAluno,
+    email:        data.email,
+    status:       "aprovado",
+    criadoEm:     data.criadoEm
+  }, { merge: true });
+}
+  
+      document.getElementById("cadastroBtn").textContent = "Enviado ✔️";
+      document.getElementById("cadastroBtn").disabled = true;
+      successMsg.style.display = "block";
+    } catch (err) {
+      console.error("Erro no cadastro: ", err);
+      alert("Erro ao enviar cadastro.");
+    }
+  });
+  
+  // Login validando status aprovado
+  const loginForm = document.getElementById("loginForm");
+  loginForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+  
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const btn = document.getElementById('loginBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const errorMsg = document.getElementById('errorMsg');
+  
+    errorMsg.style.display = "none";
+    let hasError = false;
+  
+    if (!username || !validarDominioEmail(username)) {
+      hasError = true;
+      errorMsg.textContent = "O e-mail deve ser institucional (@guarulhos.sp.gov.br) (@santaisabel.sp.gov.br) (@franciscomorato.sp.gov.br) (@ferrazdevasconcelos.sp.gov.br)";
+    }
+    if (!password) {
+      hasError = true;
+    }
+  
+    if (hasError) {
+      errorMsg.style.display = "block";
+      return;
+    }
+  
+    btn.disabled = true;
+    spinner.style.display = "block";
+    btnText.style.visibility = "hidden";
+  
+    try {
+      const docRef = doc(db, "usuarios", username);
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        if (userData.status === "aprovado") {
+          // Validação da senha cadastrada
+if (userData.senha !== password) {
+  errorMsg.textContent = "Senha incorreta.";
+  errorMsg.style.display = "block";
+  // Reativa o botão e esconde o spinner
+  btn.disabled = false;
+  spinner.style.display = "none";
+  btnText.style.visibility = "visible";
+  return; // interrompe o fluxo de login
+}
+
+  localStorage.setItem('nomeUsuario', userData.usuario);
+  localStorage.setItem('emailUsuario', username);
+
+  // 🔥 Buscar os dados do Firestore na coleção "usuarios"
+  try {
+    const docRef = doc(db, "usuarios", userData.email);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const dados = docSnap.data();
+      const chave = `dados_${dados.usuario}`;
+      localStorage.setItem(chave, JSON.stringify(dados));
+    } else {
+      console.log("⚠️ Dados não encontrados no Firestore. O aluno deverá preencher.");
+    }
+  } catch (error) {
+    console.error("Erro ao buscar dados no Firestore:", error);
+  }
+
+  // ✅ Ir para o painel normalmente
+  window.location.href = 'painel.html';
+}
+
+        else {
+          errorMsg.textContent = "Seu cadastro ainda não foi aprovado.";
+          errorMsg.style.display = "block";
+        }
+      } else {
+        errorMsg.textContent = "Usuário não encontrado ou não aprovado.";
+        errorMsg.style.display = "block";
+      }
+    } catch (error) {
+      console.error(error);
+      errorMsg.textContent = "Erro ao conectar com o servidor.";
+      errorMsg.style.display = "block";
+    }
+  
+    btn.disabled = false;
+    spinner.style.display = "none";
+    btnText.style.visibility = "visible";
+  });
+  
+  </script>
+  
+
+</body>
+</html>

@@ -1,0 +1,2094 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+    .header { background-color: #f0f2f5; padding: 20px; color: #080943; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .header img { height: 120px; }
+    .header h1 { font-size: 24px; margin: 0; }
+    .search-container { position: relative; margin-left: auto; flex-shrink: 0; }
+    .search-container input { padding: 10px 35px 10px 14px; border-radius: 8px; border: 1px solid #ccc; outline: none; font-size: 15px; width: 400px; }
+    .search-container i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888; cursor: pointer;}
+    .container { display: flex; flex: 1; }
+    .sidebar {
+  width: 230px;
+  background-color: #2c3e50;
+  padding: 20px 0;
+  color: white;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+    .sidebar a { display: flex; align-items: center; gap: 10px; padding: 15px 20px; color: white; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); transition: background 0.3s; }
+    .sidebar a:hover { background-color: #34495e; }
+    .main-content { flex: 1; padding: 30px; }
+    .info-box { background-color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    .info-box h2 { margin-bottom: 15px; color: #1d3557; }
+    .info-box p { margin: 8px 0; font-size: 16px; }
+    .disciplinas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; padding: 10px 0; }
+    .disciplina-card {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  padding: 14px 12px;
+  font-weight: 600;
+  color: #1d3557;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.disciplina-card:hover {
+  background-color: #dee2e6;
+  transform: translateY(-3px);
+}
+
+.progresso-mini {
+  height: 8px;
+  background: #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progresso-mini-barra {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1d3557, #457b9d);
+  transition: width 0.4s ease-in-out;
+}
+
+    .disciplina-card:hover { background-color: #dee2e6; transform: translateY(-3px); }
+    #calendar { max-width: 350px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+    @media (max-width: 768px) {
+      .container { flex-direction: column; }
+      .sidebar { width: 100%; position: relative; }
+      .main-content { padding: 20px; }
+      .search-container { width: 100%; margin-left: 0; margin-top: 10px; }
+      .search-container input { width: 100%; }
+      
+    }
+    
+    /* Aplica cursor e efeito hover nos dias do calendário */
+.fc-daygrid-day-frame {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.fc-daygrid-day-frame:hover {
+  background-color: #cce5ff !important; /* azul clarinho */
+  border-radius: 6px;
+}
+/* Classe para destacar a data clicada */
+.data-selecionada {
+  background-color: #007bff !important;
+  color: white;
+  border-radius: 6px;
+}
+.fc-toolbar.fc-header-toolbar {
+  justify-content: start !important; /* Alinha à esquerda */
+  gap: 20px;                         /* Espaço entre botão e título */
+}
+
+#btn-topo {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1d3557 ;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 12px 15px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: none; /* começa escondido */
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  #btn-topo {
+    display: block;
+  }
+}
+
+#info {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.perfil-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 280px;
+}
+
+.perfil-header h2 {
+  margin-bottom: 10px;
+  color: #1d3557;
+  font-size: 24px;
+}
+
+.perfil-dados p {
+  margin: 10px 0;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+}
+
+.perfil-dados p i {
+  color: #1d3557;
+}
+#btnContato {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1d3557;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 14px 17px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 999;
+}
+@media (max-width: 768px) {
+  #btnContato {
+    bottom: 90px; /* sobe acima do botão de topo */
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .popup-contato {
+    bottom: 150px; /* acompanha o botão mais alto */
+    right: 10px;
+    width: 90%;
+  }
+}
+
+
+
+.popup-contato {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.popup-contato h3 {
+  margin-bottom: 10px;
+  color: #1d3557;
+}
+
+.popup-contato input,
+.popup-contato textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.popup-contato textarea {
+  height: 80px;
+  resize: none;
+}
+
+.botoes-popup {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.botoes-popup button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.botoes-popup button:first-child {
+  background-color: #28a745;
+  color: white;
+}
+
+.botoes-popup button:last-child {
+  background-color: #6c757d;
+  color: white;
+}
+.sidebar a.ativo {
+  background-color: #3b4c61; /* tom levemente mais escuro do que o padrão */
+}
+.card-boletim {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+  border-left: 6px solid #1d3557;
+}
+
+.card-boletim:hover {
+  transform: translateY(-5px);
+}
+
+.card-boletim h3 {
+  margin-bottom: 12px;
+  color: #1d3557;
+  font-size: 18px;
+}
+
+.card-boletim .detalhes p {
+  margin: 8px 0;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+
+.card-boletim .status {
+  font-weight: bold;
+}
+
+.status.aprovado {
+  color: green;
+}
+
+.status.reprovado {
+  color: red;
+}
+
+.card-boletim .status.analise {
+  color: #f0b105 !important;
+}
+
+.card-sistema {
+    background-color: #1d3557;
+    color: white;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+  }
+  .card-sistema:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+  .footer {
+  width: 100%;
+  background-color: #f0f2f5;
+  text-align: center;
+  padding: 20px 10px;
+  font-size: 14px;
+  color: #555;
+  margin-top: 40px;
+  border-top: 1px solid #ddd;
+  position: relative;
+  clear: both;
+  display: block;
+}
+
+.footer-content p {
+  margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    font-size: 13px;
+    padding: 15px 5px;
+  }
+}
+@media (max-width: 768px) {
+  #lideranca table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  #lideranca table thead, 
+  #lideranca table tbody, 
+  #lideranca table tr, 
+  #lideranca table th, 
+  #lideranca table td {
+    white-space: nowrap;
+  }
+}
+
+.dropdown-export {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-exportar {
+  background-color: #1d3557;
+  color: white;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-exportar:hover {
+  background-color: #2b426b;
+  transform: translateY(-1px);
+}
+/* Cor de exclusão permanente para o botão “Limpar todas as disciplinas” */
+#btnClearDisciplinas {
+  background-color: #e74c3c;      /* vermelho vivo */
+  border: 1px solid #c0392b;      /* borda vermelho escuro */
+  color: #ffffff;                 /* texto branco */
+  transition: background-color 0.2s ease;
+}
+
+#btnClearDisciplinas:hover {
+  background-color: #c0392b;      /* fica ainda mais escuro ao passar o mouse */
+}
+
+.menu-exportar {
+  position: absolute;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  min-width: 160px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.menu-exportar button {
+  background: none;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menu-exportar button:hover {
+  background-color: #f1f1f1;
+}
+
+#lideranca {
+  width: 100%;
+}
+
+#lideranca > div {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+#modalDisciplina > div {
+  background: linear-gradient(145deg, #f8f9fa, #ffffff);
+  border-left: 6px solid #1d3557;
+}
+
+.sistemas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .sistemas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.input-style {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #f8f9fa;
+  transition: border-color 0.3s;
+}
+
+.input-style:focus {
+  border-color: #1d3557;
+  outline: none;
+  background-color: #ffffff;
+}
+select.input-style {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #f1f3f5;
+  color: #212529;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+select.input-style:focus {
+  background-color: #ffffff;
+  border-color: #1d3557;
+  box-shadow: 0 0 0 2px rgba(29, 53, 87, 0.2);
+  outline: none;
+}
+input.input-style:-webkit-autofill,
+select.input-style:-webkit-autofill {
+  background-color: #f1f3f5 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f1f3f5 inset !important;
+  color: #212529 !important;
+}
+
+input.input-style:-webkit-autofill:focus,
+select.input-style:-webkit-autofill:focus {
+  background-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+}
+/* Modernização visual dos links importantes */
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.link-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.link-card:hover {
+  transform: translateY(-4px);
+}
+
+.icon-area {
+  font-size: 24px;
+  margin-right: 15px;
+  color: #1d3557;
+}
+
+.text-area h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #1d3557;
+}
+
+.text-area a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+}
+.link-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.link-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background-color: #f7f9fb;
+}
+.card-boletim {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.card-boletim:hover {
+  transform: translateY(-4px);
+}
+.card-boletim .status {
+  font-weight: bold;
+  margin-top: 10px;
+}
+.card-boletim .status[data-status="Aprovado"] { color: green; }
+.card-boletim .status[data-status="Reprovado"] { color: red; }
+.card-boletim .status[data-status="Em Análise"] { color: orange; }
+
+.boletim-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .boletim-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .boletim-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.comunicado-box h3:hover {
+  text-decoration: underline;
+}
+.comunicado-box {
+    background: linear-gradient(135deg, #ffffff, #f9fbfd);
+    border-left: 6px solid #1d3557;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+  }
+
+  .comunicado-box:hover {
+    transform: translateY(-4px);
+  }
+
+  .comunicado-box h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .comunicado-box h3 .toggle-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .comunicado-box.expanded h3 .toggle-icon {
+    transform: rotate(90deg);
+  }
+
+  .comunicado-box p,
+  .comunicado-box div {
+    line-height: 1.6;
+  }
+
+  .comunicado-box div {
+    transition: all 0.3s ease;
+  }
+  .card-prova {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px;
+  cursor: pointer;
+}
+
+.card-prova:hover {
+  transform: translateY(-4px);
+  background-color: #f7f9fb;
+}
+
+.card-prova h4 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #1d3557;
+}
+
+.card-prova .status {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card-prova .status.disponivel {
+  color: green;
+}
+
+.card-prova .status.indisponivel {
+  color: #6c757d;
+}
+.card-expandido {
+  background-color: #f8f9fa;
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+  padding-top: 10px;
+  font-size: 14px;
+  text-align: left;
+  animation: fadeDown 0.3s ease;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-expandido p {
+  margin: 6px 0;
+}
+
+.card-expandido a {
+  color: #1d3557;
+  text-decoration: underline;
+  display: block;
+  margin: 4px 0;
+}
+.barra-progresso {
+  background-color: #dee2e6;
+  border-radius: 8px;
+  height: 22px;
+  overflow: hidden;
+  margin: 5px 0 10px;
+  width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progresso-preenchido {
+  background: linear-gradient(90deg, #1d3557, #457b9d);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px 0 0 8px;
+  transition: width 0.4s ease-in-out;
+}
+.progresso-mini {
+  height: 8px;
+  background: #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 8px;
+  position: relative;
+}
+
+.progresso-mini-barra {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1d3557, #457b9d);
+  transition: width 0.4s ease-in-out;
+}
+
+.porcentagem-texto {
+  display: block;
+  text-align: center;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #555;
+}
+.accordion-faltas {
+  margin-top: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  background-color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.accordion-titulo {
+  padding: 14px 18px;
+  cursor: pointer;
+  background-color: #f0f2f5;
+  font-weight: 600;
+  border-bottom: 1px solid #dee2e6;
+  color: #1d3557;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-conteudo {
+  display: none;
+  padding: 12px 18px;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+}
+
+.accordion-conteudo button {
+  background: none;
+  border: none;
+  padding: 10px 8px;
+  text-align: left;
+  width: 100%;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.accordion-conteudo button:hover {
+  background-color: #e6f0ff;
+}
+.infraction-selected {
+  padding: 10px 18px;
+  background: #e8f0ff;
+  color: #1d3557;
+  font-weight: 600;
+  border-left: 6px solid #1d3557;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 10px;
+}
+
+.btn-aplicar {
+  padding: 12px 24px;
+  background-color: #1d3557;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.1s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-aplicar:hover {
+  background-color: #2b426b;
+  transform: translateY(-1px);
+}
+.medida-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f4f8;
+  border-left: 4px solid #4a90e2;
+  font-weight: bold;
+  color: #333;
+  border-radius: 5px;
+}
+
+#uploadGrade .botao-gestao {
+  background-color: #1d3557;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+/* Sobrepõe apenas para o formulário dentro de #uploadGrade */
+#uploadGrade .form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  cursor: pointer;
+}
+
+/* Garante que cada label empilhe input em coluna */
+#uploadGrade .form-grid label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Botão de remoção com cor de alerta */
+.btn-remover {
+  background-color: #e63946;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.btn-remover:hover {
+  background-color: #c92f2f;
+}
+
+ /* ADMINISTRAÇÃO */
+ #modalAluno {
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+#modalAluno.show {
+  opacity: 1;
+}
+/* Garante que o preview de imagem fique centralizado e responsivo */
+#conteudo-pdf {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#conteudo-pdf img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 4px;
+}
+/* centraliza tudo dentro do preview da grade */
+#aulasDoDia {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* garante que a imagem seja responsiva e preservada */
+#aulasDoDia img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+/* limita o container de export e o centraliza */
+#conteudo-pdf {
+  max-width: 800px;      /* ou a largura máxima que desejar */
+  width: 100%;
+  margin: 0 auto;        /* centraliza dentro da coluna */
+}
+
+/* centraliza e torna responsiva a imagem dentro do preview */
+#aulasDoDia {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#aulasDoDia img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+/* Ajuste para Grade de Aulas no mobile */
+@media (max-width: 768px) {
+  /* Faz o wrapper da grade virar coluna (calendar + conteúdo empilhados) */
+  #grade > div[style*="flex"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* Faz o container de conteúdo (PDF/imagem) ocupar 100% da largura */
+  #grade #conteudo-pdf {
+    width: 100% !important;
+    margin-top: 20px;
+    padding: 0 15px;
+  }
+
+  /* Força a imagem da grade a preencher toda a largura possível */
+  #grade #aulasDoDia img {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    display: block;
+  }
+}
+#btnRemoveMaterial:hover {
+  background-color: #c92f2f;
+}
+/* === Painel Administrativo Limpo e Profissional === */
+
+/* Container principal */
+#controlePainel {
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* eleva suavemente */
+  margin-top: 20px;
+}
+
+/* Título da seção */
+#controlePainel > h2 {
+  font-size: 24px;
+  color: #1d3557;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+/* Campo de busca */
+#controlePainel #searchAluno {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: border-color 0.3s;
+}
+#controlePainel #searchAluno:focus {
+  border-color: #1d3557;
+  outline: none;
+  background: #ffffff;
+}
+
+/* Grid de Pelotões */
+#controlePainel #pelotoesContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Cards de Pelotão */
+#controlePainel #pelotoesContainer .disciplina-card {
+  background: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  color: #1d3557;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#controlePainel #pelotoesContainer .disciplina-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Lista de Alunos: grid responsivo */
+#controlePainel #alunosContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* Cards de Aluno */
+#controlePainel #alunosContainer .disciplina-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 12px;
+  gap: 6px;
+  transition: box-shadow 0.2s;
+}
+#controlePainel #alunosContainer .disciplina-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Formulários internos (Grade / Disciplinas) */
+#controlePainel .form-grid {
+  margin-top: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+#controlePainel .form-grid label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+#controlePainel .form-grid input,
+#controlePainel .form-grid select {
+  margin-top: 6px;
+}
+#controlePainel .btn-exportar {
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+/* Espaçamento extra antes do próximo bloco */
+#controlePainel > .info-box {
+  margin-top: 40px;
+}
+/* === Separação Visual da Gestão de Disciplinas === */
+#gestaoDisciplinasAdmin {
+  margin-top: 48px;                        /* mais espaço acima */
+  background: #ffffff;                     /* fundo branco puro */
+  border: 1px solid #dee2e6;               /* borda suave */
+  border-radius: 12px;                     /* cantos arredondados */
+  padding: 24px;                           /* espaçamento interno */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* leve elevação */
+}
+
+#gestaoDisciplinasAdmin > h2 {
+  font-size: 22px;
+  color: #1d3557;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+/* Ajuste fino nos formulários internos */
+#gestaoDisciplinasAdmin .form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+#gestaoDisciplinasAdmin label {
+  font-weight: 600;
+}
+
+#gestaoDisciplinasAdmin .btn-exportar {
+  margin-top: 8px;
+}
+#gestaoDisciplinasAdmin {
+  margin-top: 40px;    /* antes era 20px, aumenta para separar bem */
+  /* demais estilos já aplicados… */
+}
+/* === Botões menores e alinhados em fila na Gestão de Disciplinas === */
+#gestaoDisciplinasAdmin .form-grid {
+  display: flex;             /* Alinha itens em linha */
+  flex-wrap: wrap;           /* Quebra linha se necessário */
+  align-items: center;       /* Alinha verticalmente */
+  gap: 8px;                  /* Espaço entre botões e inputs */
+}
+
+#gestaoDisciplinasAdmin .form-grid button.btn-exportar {
+  padding: 6px 12px;         /* Torna o botão mais compacto */
+  font-size: 13px;           /* Reduz o tamanho do texto */
+  margin: 0;                 /* Remove margens extras */
+}
+/* Accordion para sub-seções do Painel Administrativo */
+#controlePainel h2 {
+  cursor: pointer;
+  position: relative;
+  padding-right: 24px;
+  margin-bottom: 0; /* evita espaço extra */
+}
+#controlePainel h2::after {
+  content: '\25B6';       /* triângulo apontando para a direita */
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  font-size: 14px;
+}
+#controlePainel h2.active::after {
+  transform: translateY(-50%) rotate(90deg); /* triângulo para baixo */
+}
+/* Esconde por padrão tudo que não for o próprio <h2> */
+#controlePainel > *:not(h2) {
+  display: none;
+}
+/* 1) Aumenta espaçamento entre cada <h2> */
+#controlePainel h2 {
+  margin: 32px 0 16px;                /* 32px acima, 16px abaixo */
+  transition: transform 0.2s ease,    /* prepara a animação */
+              color 0.2s ease;
+}
+
+/* 2) Efeito ao passar o mouse: desloca e muda um pouco a cor */
+#controlePainel h2:hover {
+  transform: translateX(6px);         /* leve “slide” para a direita */
+  color: #457b9d;                     /* tom suave de destaque */
+}
+.card-gestao {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 10px 16px;
+  border-bottom: 5px solid #606366; /* linha mais escura */
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.card-gestao:hover {
+  background-color: #f1f3f5;
+}
+
+.card-gestao strong {
+  color: #1d3557;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-gestao small {
+  display: block;
+  color: #666;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.card-gestao .botoes {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.card-gestao .botao-gestao {
+  background-color: #1d3557;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.card-gestao .botao-gestao:hover {
+  background-color: #2b426b;
+}
+/* Variáveis de tema */
+:root {
+  --cor-fundo-card: #ffffff;
+  --cor-texto-principal: #2c3e50;
+  --cor-accento: #2980b9;
+  --cor-sombra: rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition-speed: 0.2s;
+}
+
+/* Container de boletim usa grid para organizar */
+#boletimCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Card compacto e elegante */
+.card-boletim {
+  background: var(--cor-fundo-card);
+  color: var(--cor-texto-principal);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 5px var(--cor-sombra);
+  padding: 0.75rem;
+  font-family: sans-serif;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+/* Efeito “elevação” ao passar o mouse */
+.card-boletim:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px var(--cor-sombra);
+}
+
+/* Título da disciplina menor */
+.card-boletim h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* Detalhes com tipografia leve */
+.card-boletim .detalhes p {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+/* Status colorido (altere conforme desejado) */
+.status.aprovado   { color: #27ae60; }
+.status.reprovado  { color: #c0392b; }
+.status.analise    { color: var(--cor-accento); }
+
+button {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 20px; /* ou outro valor, tipo 16px, 24px, etc */
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: width 0.3s ease;
+}
+
+button:hover::before {
+  width: 100%;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+#lancarProvasAdmin button {
+  display: inline-block;
+  margin-right: 12px;
+  margin-top: 20px;
+}
+#lancarProvasAdmin h3 {
+  margin-top: 30px;
+  color: #1d3557;
+}
+
+#lancarProvasAdmin select,
+#lancarProvasAdmin input {
+  max-width: 300px;
+}
+
+/* === Estilização para Lançar Notas e Frequência === */
+.painel-notas-frequencia {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  margin: 32px auto;
+}
+
+.painel-notas-frequencia h3 {
+  font-size: 1.6rem;
+  color: #1d3557;
+  margin-bottom: 1.5rem;
+}
+
+/* Labels em destaque */
+.painel-notas-frequencia label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilo geral para selects e inputs */
+.painel-notas-frequencia select.input-style,
+.painel-notas-frequencia input.input-style {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Foco mais evidente */
+.painel-notas-frequencia select.input-style:focus,
+.painel-notas-frequencia input.input-style:focus {
+  border-color: #1d3557;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 53, 87, 0.15);
+}
+
+/* Campos de Nota e Frequência bem menores */
+.painel-notas-frequencia input#notaValor,
+.painel-notas-frequencia input#frequenciaValor {
+  width: 80px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  text-align: center;
+  margin-right: 1rem;
+  display: inline-block;
+}
+
+/* Garante que QRA e Disciplina fiquem full-width */
+.painel-notas-frequencia select#qraSelect,
+.painel-notas-frequencia select#disciplinaSelect {
+  width: 100%;
+}
+
+
+/* Botão de salvar alinhado e espaçado */
+.painel-notas-frequencia button {
+  margin-top: 1.5rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.painel-notas-frequencia button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  .painel-notas-frequencia {
+    padding: 16px;
+  }
+}
+/* ─── Bloco Lançar Notas e Frequência ─── */
+
+/* 1) Destacar os rótulos */
+#lancarProvasAdmin + .info-box label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+/* 2) Compactar apenas os inputs de nota e frequência */
+#notaValor,
+#frequenciaValor {
+  width: 4rem !important;       /* largura fixa */
+  max-width: 4rem !important;
+  padding: 4px !important;      /* menos padding interno */
+  font-size: 0.9rem !important; /* texto um pouco menor */
+  text-align: center;           /* centraliza o valor */
+  margin-right: 1rem;           /* espaçamento à direita */
+}
+/* ─── Reduzir selects de QRA e Disciplina em Lançar Notas e Frequência ─── */
+#qraSelect,
+#disciplinaSelect {
+  display: inline-block !important;      /* para respeitar a largura fixa */
+  width: 380px !important;               /* largura menor que 100% */
+  max-width: 380px !important;
+  padding: 6px 8px !important;           /* padding reduzido */
+  font-size: 0.95rem !important;         /* texto um pouco menor */
+  margin-right: 1rem;                    /* espaço entre os dois selects */
+}
+/* ─── Ajuste fino de espaçamento em “Lançar Notas e Frequência” ─── */
+/* 1) Label com pouco espaço abaixo */
+#lancarProvasAdmin + .info-box label {
+  display: block !important;
+  margin: 0.75rem 0 0.3rem !important;  /* 12px acima, 5px abaixo */
+  font-weight: 600 !important;
+  color: #2c3e50;
+}
+
+/* 2) Input/Select grudado ao label, mas espaçado do próximo label */
+#lancarProvasAdmin + .info-box select.input-style,
+#lancarProvasAdmin + .info-box input.input-style {
+  margin-top: 0 !important;            /* sem gap extra acima */
+  margin-bottom: 1.2rem !important;    /* 19px até o próximo label */
+  padding: 6px 10px !important;        /* ajuste fino do padding */
+  border-radius: 6px !important;
+}
+/* ─── Ajuste de posição em “Lançar Notas e Frequência” ─── */
+/* 1) Inputs de Nota e Frequência mais próximos dos seus labels */
+#lancarProvasAdmin + .info-box input#notaValor,
+#lancarProvasAdmin + .info-box input#frequenciaValor {
+  margin-top: 0.25rem !important;   /* reduz espaçamento acima */
+  margin-bottom: 0 !important;      /* remove espaçamento extra abaixo */
+}
+
+/* 2) Botão sempre em bloco, abaixo dos inputs */
+#lancarProvasAdmin + .info-box button {
+  display: block !important;        /* ocupa linha inteira */
+  margin: 1rem auto 0 auto !important; /* 16px acima, centralizado */
+  clear: both !important;           /* garante que fique abaixo de qualquer inline */
+}
+/* ===========================
+   Boletim compacto e profissional
+   =========================== */
+   .boletim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+  
+  .card-boletim {
+    background: #f9fafb;                  /* fundo claro neutro */
+    border: 1px solid #ccd1d9;            /* borda sutil */
+    border-radius: 8px;                   /* cantos levemente arredondados */
+    padding: 12px;                        /* espaço interno reduzido */
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  
+  .card-boletim:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* faixa superior colorida para título */
+  .card-boletim::before {
+    content: attr(data-titulo);
+    display: block;
+    background: #2c3e50;                  /* cor escura e formal */
+    color: #ffffff;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  
+  .card-boletim h3 {
+    font-size: 1rem;
+    margin: 0 0 6px;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  
+  .card-boletim .detalhes {
+    font-size: 0.85rem;
+    color: #4a4a4a;
+    line-height: 1.3;
+  }
+  
+  .card-boletim .detalhes p {
+    margin: 2px 0;
+  }
+  
+  .card-boletim .status {
+    margin-top: 8px;
+    font-weight: 600;
+  }
+  
+  .card-boletim .status.aprovado  { color: #2a9d8f; }  /* verde suave */
+  .card-boletim .status.reprovado { color: #e63946; }  /* vermelho suave */
+  .card-boletim .status.analise   { color: #6c757d; }  /* cinza médio */
+/* === Boletim: cards mais compactos === */
+.boletim-grid {
+  /* reduz o mínimo de 250px para 180px e diminui o gap */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.card-boletim {
+  /* menos padding e cantos discretos */
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  /* opcional: altura máxima para uniformizar */
+  max-height: 120px;
+  max-width: 240px;
+  overflow: hidden;
+}
+
+.card-boletim h3 {
+  /* título menor e mais enxuto */
+  font-size: 1rem !important;
+  margin-bottom: 4px !important;
+}
+
+.card-boletim .detalhes p {
+  /* texto de detalhe com fonte reduzida */
+  font-size: 0.8rem !important;
+  margin: 2px 0 !important;
+  line-height: 1.2 !important;
+}
+
+.card-boletim .status {
+  /* status em tamanho compacto */
+  font-size: 0.8rem !important;
+  margin-top: 4px !important;
+}
+  /* ────────────────────────────────────────────────────────── */
+/* ESTILIZAÇÃO PROFISSIONAL PARA ÁREA DE LIDERANÇA           */
+/* ────────────────────────────────────────────────────────── */
+
+/* Container geral */
+#lideranca {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+/* Cada bloco de tarefa (perfil-box) */
+#lideranca .perfil-box {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Títulos */
+#lideranca .perfil-box > h3 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: #1d3557;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tabela de presença */
+#lideranca table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+#lideranca table th,
+#lideranca table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+#lideranca table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+#lideranca table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Inputs de data e justificativa */
+#lideranca .campo-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+#lideranca .campo-form label {
+  font-weight: 500;
+}
+#lideranca .input-style {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  width: auto;
+}
+
+/* Textareas (relatório e recado) */
+#lideranca textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 80px;
+  margin-bottom: 10px;
+}
+
+/* Botões */
+#lideranca button {
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #1d3557;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+#lideranca button:hover {
+  background-color: #16324f;
+}
+
+/* Ícone de confirmação de pelotão */
+#lideranca #infoPelotao {
+  font-size: 0.95rem;
+  color: #1d3557;
+  font-weight: 600;
+  margin-left: 15px;
+}
+/* ────────── Accordion de Submissões da Liderança ────────── */
+#controlePainel .accordion-content {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+#controlePainel .accordion-content h3 {
+  background: #1d3557;
+  color: #fff;
+  margin: 0;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#controlePainel .accordion-content h3 + div {
+  background: #fafafa;
+  padding: 12px 16px;
+  display: none;
+}
+
+#controlePainel .accordion-content h3.active + div {
+  display: block;
+}
+
+.card-gestao {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+/* ────────── Submissões da Liderança (accordion mensal) ────────── */
+#toggleLideranca {
+  cursor: pointer;
+  margin-top: 20px;
+  color: #1d3557;
+}
+#submissoesLiderancaAdmin {
+  margin: 16px 0;
+}
+/* cabeçalhos internos */
+.accordion-header {
+  background: #f2f2f2;
+  color: #333;
+  padding: 10px 14px;
+  margin: 0;
+  cursor: pointer;
+  border-top: 1px solid #ddd;
+  font-weight: 600;
+}
+.accordion-body {
+  display: none;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #ddd;
+}
+/* card mensal */
+.card-mes {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.card-mes > strong {
+  display: block;
+  padding: 8px 12px;
+  background: #e8e8e8;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.card-mes > div {
+  display: none;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+/* Ações nos cards-mês */
+.card-mes .botoes-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.card-mes .botoes-acoes button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Download */
+.card-mes .btn-baixar,
+.card-mes .btn-baixar-relatorio,
+.card-mes .btn-baixar-recado {
+  background: #38a169;    /* verde */
+  color: #fff;
+}
+
+/* Excluir */
+.card-mes .btn-excluir,
+.card-mes .btn-excluir-relatorio,
+.card-mes .btn-excluir-recado {
+  background: #e53e3e;    /* vermelho */
+  color: #fff;
+}
+/* ───── Hover profissional em cada registro ───── */
+.card-mes .entry {
+  background: #fff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.card-mes .entry:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  background: #f9f9f9;
+}
+
+/* ───── Hover nos cabeçalhos de seção ───── */
+.accordion-header {
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: #e0e0e0;
+  color: #1d3557;
+}
+
+/* ───── Animação suave ao abrir/fechar accordion ───── */
+.card-mes > div,
+#submissoesLiderancaAdmin .accordion-body {
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  overflow: hidden;
+}
+/* Estiliza apenas o botão de adicionar disciplina */
+#btnAddDisciplina {
+  background-color: #1d3557;      /* cor institucional */
+  color: #ffffff;                 /* texto em branco */
+  border: none;                   /* remove borda padrão */
+  padding: 10px 20px;             /* espaçamento interno */
+  border-radius: 6px;             /* cantos arredondados */
+  font-weight: 600;               /* texto mais forte */
+  cursor: pointer;                /* cursor de botão */
+  transition: background-color .2s;
+}
+#btnAddDisciplina:hover {
+  background-color: #16324f;      /* tom mais escuro no hover */
+}
+/* Centraliza o grid do Boletim no Painel Administrativo */
+#controlePainel .accordion-content > .form-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px !important;
+}
+
+/* Define largura mínima para os selects */
+#selectPelotaoBoletim,
+#selectAlunoBoletim {
+  min-width: 130px;
+}
+
+/* Ajusta botões para alinhamento */
+#btnVerBoletim,
+#btnExportarBoletimInd {
+  margin-top: -1; /* removendo possíveis margens indesejadas */
+}
+/* Detalhes do Boletim */
+/* ====== Estilo Profissional para Detalhes do Boletim ====== */
+.detalhes-boletim {
+  width: 100%;
+  max-width: 600px;
+  margin: 40px auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.detalhes-boletim .detalhes-header {
+  background-color: #1d3557;
+  padding: 16px;
+  text-align: center;
+}
+
+.detalhes-boletim .detalhes-header h3 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.detalhes-boletim .detalhes-body {
+  background-color: #ffffff;
+  padding: 24px;
+}
+
+.detalhes-boletim .detalhes-body p {
+  margin: 8px 0;
+  color: #444444;
+  font-size: 1rem;
+}
+
+.detalhes-boletim .detalhes-body hr {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  margin: 16px 0;
+}
+
+.detalhes-boletim .det-footer {
+  text-align: center;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.detalhes-boletim .det-footer .btn-secundario {
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+
+.btn-secundario {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.btn-secundario:hover {
+  background-color: #e2e6ea;
+}
+/* ====== Grid Profissional de Disciplinas ====== */
+.lista-disciplinas {
+  list-style: none;
+  padding: 0;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 800px;
+}
+
+.lista-disciplinas .disc-item {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-size: 1rem;
+  color: #1d3557;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lista-disciplinas .disc-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.lista-disciplinas .disc-item::after {
+  content: "→";
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #1d3557;
+}
+.btn-principal {
+  padding: 8px 20px;
+  background: #1d3557;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.btn-principal:hover {
+  background: #163248;
+}
+@media (max-width: 768px) {
+  /* 1) Formulários empilham em 1 coluna */
+  #controlePainel .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 2) Cards (disciplinas, boletim, alunos) ficam 100% largura */
+  #controlePainel .disciplina-card,
+  #controlePainel .card-boletim,
+  #controlePainel .card-gestao {
+    width: 100% !important;
+    margin: 0 0 12px !important;
+  }
+
+  /* 3) Inputs e selects fluidos */
+  #controlePainel .input-style {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* 4) Tabelas no painel ganham scroll horizontal */
+  #controlePainel .info-box table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 5) Padding reduzido para melhor encaixe */
+  #controlePainel .perfil-box,
+  #controlePainel .info-box,
+  #controlePainel .accordion-content {
+    padding: 8px 12px !important;
+  }
+}
+.lista-medidas details {
+  margin-bottom: 1em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+.lista-medidas summary {
+  font-weight: bold;
+  cursor: pointer;
+}
+.lista-medidas ul {
+  list-style: none;
+  padding-left: 1em;
+}
+.lista-medidas li {
+  margin: 0.3em 0;
+}
+/* ─── Estilo para a seção de Medidas Disciplinares ─── */
+#medidasDisciplinaresSection {
+  display: grid;
+  /* duas colunas com tamanho mínimo e máximo flexível */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  column-gap: 24px;   /* espaço horizontal entre colunas */
+  row-gap: 16px;      /* espaço vertical entre linhas */
+  margin-bottom: 32px;/* afasta do botão e do histórico */
+}
+
+#medidasDisciplinaresSection .campo-label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;  /* melhora o tracking do texto */
+  color: #1d3557;
+  margin: 0;              /* remove espaçamentos extras */
+}
+
+#medidasDisciplinaresSection .campo-label > * {
+  margin-top: 6px;        /* espaço entre o texto do label e o select/textarea */
+}
+
+#medidasDisciplinaresSection .input-style {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;  /* suaviza o tracking dos campos */
+}
+
+#medidasDisciplinaresSection textarea.input-style {
+  resize: vertical;
+  line-height: 1.4;
+}
+
+/* Ajuste no botão de aplicação para manter consistência visual */
+#btnAplicarMedida {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+/* ─── Afastar o título "Histórico de Medidas Disciplinares" do botão ─── */
+#btnAplicarMedida {
+  /* mantém o espaçamento superior e adiciona 24px abaixo */
+  margin: 8px 0 24px;
+}
+
+#btnAplicarMedida + h3 {
+  /* remove qualquer margem extra do h3 para respeitar só o margin-bottom do botão */
+  margin-top: 0;
+}
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* espaço entre input, lupa e sino */
+}
+
+#btnAvisos {
+  cursor: pointer;
+  font-size: 20px;
+  color: #1d3557;
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espaço uniforme entre logo, título, barra e sino */
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#btnAvisos {
+  /* caso queira ajustar ainda mais o espaçamento ou tamanho */
+  margin-left: 8px;
+  font-size: 20px;
+  color: #1d3557;
+  cursor: pointer;
+}
+/* SweetAlert2 popup personalizado */
+.swal2-popup {
+  font-family: 'Segoe UI', sans-serif;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+}
+
+.swal2-title {
+  color: #1d3557;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.swal2-html-container {
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.swal2-confirm {
+  font-size: 1rem;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 0.5rem;
+}
+/* Posiciona o badge relativo ao sino */
+#btnAvisos {
+  position: relative;
+}
+
+/* Badge circular, vermelho, oculto por padrão */
+#badgeAvisos {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  display: none; /* ficará visível quando count > 0 */
+  line-height: 1;
+  text-align: center;
+}
+/* ─── Oculta todo o conteúdo até o JS decidir qual mostrar ─── */
+.main-content {
+  visibility: hidden;
+}
+
+.assinatura .linha-assinatura {
+  margin: 2px 0;       /* reduz margens superior/inferior */
+  line-height: 1.2;    /* controla o espaçamento interno da linha */
+}

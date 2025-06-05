@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Aprovar Cadastros</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-ku5eXz+Yj6snJ7+O7u1LQnr11b9eQ1lYVuHoF9k2vtdcVtJz17gKnZYrMPmoY5G9gdQiXf5MdUg3dvM6lYKgOg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="admin.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+  <h2>Gerenciamento de Usuários</h2>
+ <button class="btn-voltar" onclick="window.location.href='painel.html'">
+   <i class="fas fa-arrow-left"></i> 🠐 Voltar ao Painel
+ </button>
+ <p></p>
+  <div class="tabs">
+    <button class="tab-button active" onclick="mostrarAba('pendentes')">Pendentes</button>
+    <button class="tab-button" onclick="mostrarAba('aprovados')">Cadastrados</button>
+    <button class="tab-button" onclick="mostrarAba('redefinicao')">
+  Redefinições
+</button>
+<button class="tab-button" onclick="mostrarAba('preCadastro')">Pré-Cadastro</button>
+
+
+  </div>
+  <div id="pendentes"></div>
+  <div id="searchContainer" class="hidden search-bar">
+    <input
+      type="text"
+      id="searchAprovados"
+      placeholder="🔍 Pesquisar usuários…"
+    />
+  </div>
+
+  <div id="aprovados" class="hidden"></div>
+  <div id="redefinicao" class="hidden"></div>
+
+<div id="preCadastro" class="hidden">
+  <h2>Gestão de Pré-Cadastro</h2>
+
+  <div class="perfil-box">
+    <h3>Adicionar Novo</h3>
+    <div class="form-grid">
+      <label>Email:
+        <input type="email" id="emailPre" placeholder="E-mail institucional">
+      </label>
+      <label>C.F:
+        <input type="text" id="cfPre" placeholder="Código Funcional (CF)">
+      </label>
+      <label>R.E:
+        <input type="text" id="rePre" placeholder="Registro (RE)">
+      </label>
+      <label>Curso:
+        <input type="text" id="cursoPre" placeholder="Curso">
+      </label>
+      <label>CPF:
+        <input type="text" id="cpfPre" placeholder="CPF">
+      </label>
+      <label>Data de Nascimento:
+        <input type="date" id="dataNascPre">
+      </label>
+      <label>Endereço:
+        <input type="text" id="enderecoPre" placeholder="Endereço">
+      </label>
+      <label>Telefone:
+        <input type="text" id="telefonePre" placeholder="Telefone">
+      </label>
+      <label>Tipo Sanguíneo:
+        <select id="sanguePre">
+          <option value="">Selecione</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+      </label>
+
+    </div>
+    <button onclick="salvarPreCadastro()">Salvar</button>
+  </div>
+
+  <div class="perfil-box">
+    <h3>Lista de Pré-Cadastrados</h3>
+    <div id="listaPreCadastro"></div>
+  </div>
+</div>
+
+
+  
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "painel-alunos-25f68.firebaseapp.com",
+      projectId: "painel-alunos-25f68",
+      storageBucket: "painel-alunos-25f68.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const divPendentes = document.getElementById("pendentes");
+    const divAprovados = document.getElementById("aprovados");
+async function carregarUsuarios() {
+  // Limpa ambas as áreas antes de preencher
+  divPendentes.innerHTML = '';
+  divAprovados.innerHTML = '';
+
+  // 1) Pendentes (só quem tiver status == "pendente")
+  // 1) Pendentes (só quem tiver status == "pendente")
+  const pendentesQuery = query(
+    collection(db, "usuariosPendentes"),
+    where("status", "==", "pendente")
+  );
+
+  const pendentesSnapshot = await getDocs(pendentesQuery);
+   pendentesSnapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.setAttribute("data-id", docSnap.id);
+    card.innerHTML = `
+      <div class="info"><strong>Nome:</strong> ${data.nome}</div>
+      <div class="info"><strong>Usuário:</strong> ${data.usuario}</div>
+      <div class="info"><strong>Email:</strong> ${data.email}</div>
+      <div class="info"><strong>Pelotão:</strong> ${data.pelotao}</div>
+    `;
+    const actions = document.createElement("div");
+    actions.classList.add("actions");
+    actions.innerHTML = `
+      <button class="btn-aprovar" onclick="aprovar('${docSnap.id}')">
+        <i class="fas fa-check-circle"></i> Aprovar
+      </button>
+      <button class="btn-recusar" onclick="recusar('${docSnap.id}')">
+        <i class="fas fa-times-circle"></i> Recusar
+      </button>
+    `;
+    card.appendChild(actions);
+    divPendentes.appendChild(card);
+  });
+
+  // 2) Cadastrados
+const aprovadosQuery = query(
+ collection(db, "usuarios"),
+   where("status", "==", "aprovado")
+ );
+ const cadastradosSnapshot = await getDocs(aprovadosQuery);
+  cadastradosSnapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const details = document.createElement("details");
+    details.classList.add("user-item");
+
+    // cabeçalho clicável com nome
+    const summary = document.createElement("summary");
+    summary.textContent = data.nome || '— Sem nome —';
+    details.appendChild(summary);
+
+Object.entries(data).forEach(([key, value]) => {
+  if (key === 'nome') return;
+
+  // Se for senha, exibe apenas ******
+  let displayValue;
+  if (key === 'senha') {
+    displayValue = '••••••'; // ou '******'
+  } else {
+    // Converte Timestamp em string legível, se for o caso
+    if (value && typeof value.toDate === 'function') {
+      displayValue = value
+        .toDate()
+        .toLocaleString('pt-BR', {
+          day:   '2-digit',
+          month: '2-digit',
+          year:  'numeric',
+          hour:   '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+    } else {
+      displayValue = value === undefined || value === null ? '—' : value;
+    }
+  }
+
+  // Gera label “Senha” ou outro campo
+  const label = key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase());
+
+  const infoDiv = document.createElement("div");
+  infoDiv.classList.add("info");
+  infoDiv.innerHTML = `<strong>${label}:</strong> ${displayValue}`;
+  details.appendChild(infoDiv);
+});
+
+// ─── Campo para redefinir senha ───
+const resetDiv = document.createElement("div");
+resetDiv.classList.add("actions");
+resetDiv.innerHTML = `
+  <input
+    type="password"
+    id="senhaReset-${docSnap.id}"
+    placeholder="Senha"
+    maxlength="6"
+    style="width:70%; margin-right:8px;"
+  />
+  <button onclick="resetSenha('${docSnap.id}')" class="btn-redefinir">
+    <i class="fas fa-key"></i> Redefinir Senha
+  </button>
+`;
+details.appendChild(resetDiv);
+
+
+    divAprovados.appendChild(details);
+  });
+  if (divAprovados.children.length === 0) {
+    divAprovados.innerHTML = "<p>Nenhum usuário cadastrado ainda.</p>";
+  }
+}
+   // ─── Função para resetar senha ───
+window.resetSenha = async function(id) {
+  const campo = document.getElementById(`senhaReset-${id}`);
+  const newSenha = campo.value.trim();
+  if (!/^\d{6}$/.test(newSenha)) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Senha inválida',
+      text: 'A senha deve ter exatamente 6 dígitos numéricos.'
+    });
+  }
+};
+
+// ─── Função para carregar só usuários pendentes ───
+async function carregarPendentes() {
+  divPendentes.innerHTML = '';
+  const pendentesQuery = query(
+    collection(db, "usuariosPendentes"),
+    where("status", "==", "pendente")
+  );
+  const pendentesSnapshot = await getDocs(pendentesQuery);
+  pendentesSnapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.setAttribute("data-id", docSnap.id);
+    card.innerHTML = `
+      <div class="info"><strong>Nome:</strong> ${data.nome}</div>
+      <div class="info"><strong>Usuário:</strong> ${data.usuario}</div>
+      <div class="info"><strong>Email:</strong> ${data.email}</div>
+      <div class="info"><strong>Pelotão:</strong> ${data.pelotao}</div>
+    `;
+    const actions = document.createElement("div");
+    actions.classList.add("actions");
+    actions.innerHTML = `
+      <button class="btn-aprovar" onclick="aprovar('${docSnap.id}')">
+        <i class="fas fa-check-circle"></i> Aprovar
+      </button>
+      <button class="btn-recusar" onclick="recusar('${docSnap.id}')">
+        <i class="fas fa-times-circle"></i> Recusar
+      </button>
+    `;
+    card.appendChild(actions);
+    divPendentes.appendChild(card);
+  });
+}
+
+// ─── Função para carregar só usuários aprovados ───
+async function carregarAprovados() {
+  divAprovados.innerHTML = '';
+  const aprovadosQuery = query(
+    collection(db, "usuarios"),
+    where("status", "==", "aprovado")
+  );
+  const cadastradosSnapshot = await getDocs(aprovadosQuery);
+  cadastradosSnapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const details = document.createElement("details");
+    details.classList.add("user-item");
+    const summary = document.createElement("summary");
+    summary.textContent = data.nome || '— Sem nome —';
+    details.appendChild(summary);
+Object.entries(data).forEach(([key, value]) => {
+  if (key === 'nome') return;
+
+  // Se for senha, exibe apenas ******
+  let displayValue;
+  if (key === 'senha') {
+    displayValue = '••••••'; // ou '******'
+  } else {
+    // Converte Timestamp em string legível, se for o caso
+    if (value && typeof value.toDate === 'function') {
+      displayValue = value
+        .toDate()
+        .toLocaleString('pt-BR', {
+          day:   '2-digit',
+          month: '2-digit',
+          year:  'numeric',
+          hour:   '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+    } else {
+      displayValue = value === undefined || value === null ? '—' : value;
+    }
+  }
+
+  // Gera label “Senha” ou outro campo
+  const label = key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase());
+
+  const infoDiv = document.createElement("div");
+  infoDiv.classList.add("info");
+  infoDiv.innerHTML = `<strong>${label}:</strong> ${displayValue}`;
+  details.appendChild(infoDiv);
+});
+
+    divAprovados.appendChild(details);
+  });
+  if (divAprovados.children.length === 0) {
+    divAprovados.innerHTML = "<p>Nenhum usuário cadastrado ainda.</p>";
+  }
+}
+
+// ─── Carrega solicitações de redefinição ───
+// ─── Carrega solicitações de redefinição ───
+async function carregarRedefinicoes() {
+  const div = document.getElementById("redefinicao");
+  div.innerHTML = "";
+
+  const snapshot = await getDocs(query(collection(db, "solicitacoesRedefinicao")));
+  if (snapshot.empty) {
+    div.innerHTML = "<p>Não há solicitações pendentes.</p>";
+    return;
+  }
+
+  for (const docSnap of snapshot.docs) {
+    const { usuario, email, dataSolicitacao } = docSnap.data();
+    const idReq = docSnap.id;
+
+    // busca o usuário existente para obter senha atual
+    const userRef = doc(db, "usuarios", email);
+    const userSnap = await getDoc(userRef);
+    const senhaAtual = userSnap.exists() && userSnap.data().senha
+      ? userSnap.data().senha
+      : "— não encontrada —";
+
+    // formata data para pt-BR
+    const dt = dataSolicitacao.toDate
+      ? dataSolicitacao.toDate().toLocaleString("pt-BR")
+      : new Date(dataSolicitacao).toLocaleString("pt-BR");
+
+    const card = document.createElement("div");
+    card.classList.add("card", "redef-card");
+card.innerHTML = `
+  <div class="info"><strong>QRA:</strong> ${usuario}</div>
+  <div class="info"><strong>E-mail:</strong> ${email}</div>
+  <div class="info"><strong>Solicitado em:</strong> ${dt}</div>
+  <div class="info"><strong>Senha atual:</strong> ${senhaAtual}</div>
+  <div class="actions">
+    <input
+      type="text"
+      id="novaSenha-${idReq}"
+      placeholder="Senha"
+      maxlength="6"
+      style="flex:1; margin-right:8px;"
+    />
+    <button
+      onclick="enviarEmail('${idReq}','${email}','${usuario}')"
+      class="btn-email"
+    >
+      <i class="fas fa-envelope"></i> Enviar E-mail
+    </button>
+  </div>
+`;
+
+    div.appendChild(card);
+  }
+}
+
+window.aplicarRedefinicao = async function(idReq, emailUsuario, senhaAtual, usuario) {
+  const campo    = document.getElementById(`novaSenha-${idReq}`);
+  const novaSenha = campo.value.trim();
+
+  if (!/^\d{6}$/.test(novaSenha)) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Formato inválido',
+      text: 'A senha deve ter exatamente 6 dígitos numéricos.'
+    });
+  }
+
+  try {
+    // Atualiza senha
+    await setDoc(
+      doc(db, "usuarios", emailUsuario),
+      { senha: novaSenha },
+      { merge: true }
+    );
+    // Remove solicitação
+    await deleteDoc(doc(db, "solicitacoesRedefinicao", idReq));
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Redefinição concluída',
+      text: `Senha do e-mail ${emailUsuario} atualizada.`
+    });
+    carregarRedefinicoes();
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Falha ao aplicar',
+      text: err.message
+    });
+  }
+};
+// ─── Abre Gmail com compose pré-preenchido ───
+window.enviarEmail = function(idReq, emailUsuario, usuario) {
+  const novaSenha = document.getElementById(`novaSenha-${idReq}`).value.trim();
+
+  if (!/^\d{6}$/.test(novaSenha)) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Formato inválido',
+      text: 'Digite uma senha de 6 dígitos antes de enviar o e-mail.'
+    });
+  }
+
+  const assunto = encodeURIComponent("Sua Senha – Sistema EFAG");
+  const corpo = encodeURIComponent(
+    `Olá ${usuario},\n\n` +
+    `sua senha do Sistema EFAG é: ${novaSenha}\n\n` +
+    `Acesse o sistema em https://seu-site-efag/ e faça login com ela.\n\n` +
+    `Atenciosamente,\nEquipe EFAG`
+  );
+
+  // URL que abre o Gmail no compose
+  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailUsuario}` +
+              `&su=${assunto}&body=${corpo}`;
+
+  window.open(url, "_blank");
+};
+
+window.aprovar = async function(id) {
+  // 1) Busca o pendente
+  const pendenteRef = doc(db, "usuariosPendentes", id);
+  const pendenteSnap = await getDoc(pendenteRef);
+  if (!pendenteSnap.exists()) return;
+  const dados = pendenteSnap.data();
+
+  // 2) Puxa os dados do pré-cadastro pelo e-mail
+  const preRef   = doc(db, "dadosPreCadastrados", dados.email);
+  const preSnap  = await getDoc(preRef);
+  const preDados = preSnap.exists() ? preSnap.data() : {};
+
+  try {
+    // 3) Cria/atualiza o perfil completo em 'usuarios'
+    await setDoc(
+      doc(db, "usuarios", id),
+      {
+        // Funcionais
+        usuario:        dados.usuario,
+        senha:          dados.senha,
+        email:          dados.email,
+        nome: dados.nome,
+
+        // Pré-cadastro
+        cfAluno:        preDados.cf             || "",
+        reAluno:        preDados.re             || "",
+        cursoAluno:     preDados.curso          || "",
+        cpfAluno:       preDados.cpf            || "",
+        dataNascimento: preDados.dataNascimento || "",
+        enderecoAluno:  preDados.endereco       || "",
+        telefoneAluno:  preDados.telefone       || "",
+        sangueAluno:    preDados.tipoSanguineo  || "",
+        // Metadados
+        status:         "aprovado",
+        aprovadoEm:     new Date()
+      },
+      { merge: true }
+    );
+
+    // 4) Limpa pendente (e, se quiser, pré-cadastro)
+    await deleteDoc(pendenteRef);
+    if (preSnap.exists()) {
+      await deleteDoc(preRef);
+    }
+
+    // 5) Mensagem de sucesso e recarrega a lista
+    Swal.fire({
+      icon: 'success',
+      title: 'Usuário aprovado!',
+      text: `${dados.nome} agora está cadastrado.`,
+      confirmButtonColor: '#1d3557'
+    });
+    carregarUsuarios();
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Erro ao aprovar',
+      text: 'Não foi possível concluir. Tente novamente.',
+      confirmButtonColor: '#e63946'
+    });
+  }
+};
+
+
+window.recusar = async function(id) {
+  const docRef = doc(db, "usuariosPendentes", id);
+  const snapshot = await getDoc(docRef);
+
+  if (snapshot.exists()) {
+    const dados = snapshot.data();
+
+    Swal.fire({
+      title: `Deseja realmente recusar ${dados.nome}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e63946',
+      cancelButtonColor: '#ccc',
+      confirmButtonText: 'Sim, recusar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteDoc(docRef);
+          Swal.fire({
+            icon: 'success',
+            title: 'Usuário recusado',
+            text: `${dados.nome} foi removido da lista de pendentes.`,
+            confirmButtonColor: '#1d3557'
+          });
+
+          carregarUsuarios();
+        } catch (err) {
+          console.error(err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro ao recusar',
+            text: 'Não foi possível excluir o cadastro.',
+            confirmButtonColor: '#e63946'
+          });
+        }
+      }
+    });
+  }
+};
+
+const searchContainer = document.getElementById('searchContainer');
+const searchInput     = document.getElementById('searchAprovados');
+
+// Função que filtra os detalhes de usuários cadastrados
+function filterAprovados() {
+  const termo = searchInput.value.toLowerCase();
+  const itens = divAprovados.querySelectorAll('.user-item');
+  itens.forEach(item => {
+    const texto = item.innerText.toLowerCase();
+    item.style.display = texto.includes(termo) ? '' : 'none';
+  });
+}
+
+
+searchInput.addEventListener('input', filterAprovados);
+
+const originalMostrarAba = window.mostrarAba;
+
+
+window.mostrarAba = function(aba) {
+  const tabIds = ['pendentes','aprovados','redefinicao','preCadastro'];
+  const panels = tabIds.map(id => document.getElementById(id));
+  const buttons = document.querySelectorAll('.tab-button');
+
+  // 1) esconder todas as abas e remover active de todos os botões
+  panels.forEach(p => p.classList.add('hidden'));
+  buttons.forEach(b => b.classList.remove('active'));
+
+  // 2) ativar o botão e mostrar o painel correspondente
+  const idx = tabIds.indexOf(aba);
+  if (idx > -1) {
+    buttons[idx].classList.add('active');
+    panels[idx].classList.remove('hidden');
+  }
+
+  // 3) chamar a função de carregamento certa
+  switch(aba) {
+    case 'pendentes':   carregarPendentes();    break;
+    case 'aprovados':   carregarAprovados();    break;
+    case 'redefinicao': carregarRedefinicoes(); break;
+    case 'preCadastro': listarPreCadastro();     break;
+  }
+
+  // 4) mostrar/ocultar busca em “Cadastrados”
+  const search = document.getElementById('searchContainer');
+  if (aba === 'aprovados') {
+    search.classList.remove('hidden');
+    document.getElementById('searchAprovados').value = '';
+  } else {
+    search.classList.add('hidden');
+  }
+};
+
+window.addEventListener('DOMContentLoaded', carregarPendentes);
+
+
+// ─── Função de Pré-Cadastro corrigida ───
+async function salvarPreCadastro() {
+  // 1) Lê todos os campos do formulário
+  const email    = document.getElementById('emailPre').value.trim();
+  const cf       = document.getElementById('cfPre').value.trim();
+  const re       = document.getElementById('rePre').value.trim();
+  const curso    = document.getElementById('cursoPre').value.trim();
+  const cpf      = document.getElementById('cpfPre').value.trim();
+  const dataNasc = document.getElementById('dataNascPre').value.trim();
+  const endereco = document.getElementById('enderecoPre').value.trim();
+  const telefone = document.getElementById('telefonePre').value.trim();
+  const sangue   = document.getElementById('sanguePre').value.trim();
+
+  // 2) Validação mínima
+  if (!email || !cf || !re || !curso || !re || !cpf || !dataNasc || !endereco || !telefone|| !sangue ) {
+    return Swal.fire({
+      icon: 'warning',
+      title: '⚠️ Campos obrigatórios',
+      text: 'Preencha os campos antes de salvar.'
+    });
+  }
+
+  try {
+    // 3) Grava no Firestore, usando o e-mail como ID
+    await setDoc(
+      doc(db, "dadosPreCadastrados", email),
+      {
+        email,
+        cf,
+        re,
+        curso,
+        cpf,
+        dataNascimento: dataNasc,
+        endereco,
+        telefone,
+        tipoSanguineo: sangue
+      }
+    );
+
+    // 4) Feedback e atualização da lista
+    Swal.fire({
+      icon: 'success',
+      title: '✅ Pré-cadastro salvo!',
+      timer: 1500,
+      showConfirmButton: false
+    });
+    listarPreCadastro();
+  } catch (err) {
+    console.error("Erro ao salvar pré-cadastro:", err);
+    Swal.fire({
+      icon: 'error',
+      title: '❌ Erro ao salvar',
+      text: err.message || 'Tente novamente.'
+    });
+  }
+}
+// expõe para o botão <button onclick="salvarPreCadastro()">
+window.salvarPreCadastro = salvarPreCadastro;
+
+
+
+async function listarPreCadastro() {
+  const container = document.getElementById('listaPreCadastro');
+  container.innerHTML = '';
+
+  const snap = await getDocs(collection(db, "dadosPreCadastrados"));
+  snap.forEach(docSnap => {
+    const dados = docSnap.data();
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <strong>Email:</strong> ${dados.email} <br>
+      <strong>CPF:</strong> ${dados.cpf || '—'}<br>
+      <strong>Data Nasc:</strong> ${dados.dataNascimento || '—'}<br>
+      <strong>Telefone:</strong> ${dados.telefone || '—'}<br>
+      <strong>Endereço:</strong> ${dados.endereco || '—'}<br>
+      <strong>Tipo Sanguíneo:</strong> ${dados.tipoSanguineo || '—'}
+      <br>
+      <button class="btn-recusar" onclick="excluirPreCadastro('${docSnap.id}')">
+        <i class="fas fa-trash"></i> Excluir
+      </button>
+      <hr>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// 🔥 Excluir pré-cadastro
+async function excluirPreCadastro(email) {
+  await deleteDoc(doc(db, "dadosPreCadastrados", email));
+  Swal.fire({ icon: 'success', title: '🗑️ Removido!' });
+  listarPreCadastro();
+}
+
+  </script>
+  
+</body>
+</html>

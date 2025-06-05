@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Aluno - EFAG</title>
+
+  <link rel="icon" href="efag-logo.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+  <link rel="stylesheet" href="painel.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+
+  <!-- Para ler arquivos .xlsx/.xls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Firebase Core SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdiDZNB963EFy6QWl5M-szV199SvQ5r4I",
+      authDomain: "painel-alunos-25f68.firebaseapp.com",
+      projectId: "painel-alunos-25f68",
+      storageBucket: "painel-alunos-25f68.appspot.com",
+      messagingSenderId: "733465490272",
+      appId: "1:733465490272:web:6170d1d78ab955b8cd6405"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <div class="header">
+    <img src="efag-logo-transparente.png" alt="EFAG Logo" />
+    <h1 id="titulo-bemvindo">Bem-vindo(a),</h1>
+      <i class="fas fa-bell" id="btnAvisos" title="Meus Avisos"
+     style="cursor:pointer; margin-left:12px; font-size:20px; color:#1d3557;">
+      <span id="badgeAvisos" class="badge"></span>
+  </i>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Pesquisar no sistema...">
+      <i class="fas fa-search"></i>
+    </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <a href="#" onclick="showSection('comunicados')"><i class="fas fa-bullhorn"></i> Comunicados</a>
+      <a href="#" onclick="showSection('info')"><i class="fas fa-user"></i> Informações</a>
+      <a href="#" onclick="showSection('grade')"><i class="fas fa-calendar-alt"></i> Grade de Aulas</a>
+<a href="#" id="linkEAD"><i class="fas fa-graduation-cap"></i> EAD</a>
+      <a href="#" onclick="showSection('disciplinas')"><i class="fas fa-book"></i> Disciplinas</a>
+      <a href="#" onclick="showSection('provas')"><i class="fas fa-file-alt"></i> Provas</a>
+      <a href="#" onclick="showSection('notas')"><i class="fas fa-chart-line"></i> Boletim</a>
+      <a href="#" onclick="showSection('sistemas')"><i class="fas fa-network-wired"></i> Sistemas</a>
+      <a href="#" onclick="showSection('linksImportantes')"><i class="fas fa-link"></i> Links Importantes</a>
+      <a href="#" onclick="showSection('lideranca')"><i class="fas fa-user-shield"></i> Área de Liderança</a>
+      <a href="#" id="linkPainelAdmin" style="display: none;"
+        onclick="showSection('controlePainel'); abrirGestaoAlunos();  carregarPelotoes();
+        carregarDisciplinasParaLancamento();
+        carregarDisciplinasParaEdicao()">
+        <i class="fas fa-cogs"></i> Painel Administrativo
+      </a>
+      <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
+
+    </div>
+    <div class="main-content">
+      <div id="comunicados" class="info-box" style="display: none;">
+        <h2>Comunicados Oficiais</h2>
+        <div id="listaComunicados" style="display: flex; flex-direction: column; gap: 15px;"></div>
+      </div>
+      <!-- Aba de Informações -->
+      <div id="info" class="info-box">
+        <!-- Bloco 1 - Dados funcionais -->
+        <div class="perfil-box">
+          <h3 style="color:#1d3557; margin-bottom: 20px;">Informações Funcionais</h3>
+          <div class="form-grid">
+            <label class="campo-label">QRA:
+              <input type="text" id="qraAluno" class="input-style" disabled
+                oninput="this.value=this.value.replace(/[^a-zA-ZÀ-ú\s]/g,'')" />
+            </label>
+
+            <label class="campo-label">C.F:
+              <input type="text" id="cfAluno" class="input-style" maxlength="6" disabled
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </label>
+
+            <label class="campo-label">RE:
+              <input type="text" id="reAluno" class="input-style" maxlength="6" disabled
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </label>
+
+            <label class="campo-label">Pelotão:
+              <input type="text" id="pelotaoAluno" class="input-style" maxlength="2" disabled
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </label>
+
+            <label class="campo-label">Email:
+              <input type="email" id="emailAluno" class="input-style" disabled />
+            </label>
+
+            <label class="campo-label">Curso:
+              <input type="text" id="cursoAluno" class="input-style" value="Formação de Guardas Municipais" disabled />
+            </label>
+          </div>
+        </div>
+
+        <!-- Bloco 2 - Dados pessoais -->
+        <div class="perfil-box">
+          <h3 style="color:#1d3557; margin-bottom: 20px;">Dados Pessoais</h3>
+          <div class="form-grid">
+            <label class="campo-label">Nome completo:
+              <input type="text" id="nomeCompleto" class="input-style" disabled
+                oninput="this.value=this.value.replace(/[^a-zA-ZÀ-ú\s]/g,'')" />
+            </label>
+
+            <label class="campo-label">CPF:
+              <input type="text" id="cpfAluno" class="input-style" disabled
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </label>
+
+            <label class="campo-label">Data de nascimento:
+              <input type="date" id="dataNascimento" class="input-style" disabled />
+            </label>
+
+            <label class="campo-label">Endereço:
+              <input type="text" id="enderecoAluno" class="input-style" disabled />
+            </label>
+
+            <label class="campo-label">Telefone:
+              <input type="text" id="telefoneAluno" class="input-style" disabled
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </label>
+
+            <label class="campo-label">Tipo sanguíneo:
+              <select id="sangueAluno" class="input-style" disabled>
+                <option value="">Selecione</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="disciplinas" class="info-box" style="display: none;">
+        <h2>Disciplinas</h2>
+        <div class="disciplinas-grid">
+          <!-- Cards das disciplinas -->
+
+        </div>
+      </div>
+      <div id="provas" class="info-box" style="display: none;">
+        <h2>Provas por Disciplina</h2>
+        <p style="margin-bottom: 20px;">Clique na disciplina para acessar a prova (quando disponível).</p>
+        <div id="provasGrid" class="disciplinas-grid">
+          <!-- Os cards serão gerados via JavaScript -->
+
+        </div>
+      </div>
+      <div id="notas" class="info-box" style="display: none;">
+        <h2>Boletim</h2>
+        <div id="filtrosBoletim"
+          style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+          <label for="filtroStatus">Filtrar por status:</label>
+          <select id="filtroStatus" onchange="filtrarBoletim()">
+            <option value="todos">Todos</option>
+            <option value="Aprovado">Aprovado</option>
+            <option value="Reprovado">Reprovado</option>
+            <option value="Em Análise">Em Análise</option>
+          </select>
+          <button onclick="ordenarPorNota()"
+            style="margin-left: auto; padding: 6px 12px; cursor: pointer; border: none; background-color: #1d3557; color: white; border-radius: 5px;">Ordenar
+            por Nota</button>
+        </div>
+
+        <div id="boletimCards" class="boletim-grid">
+          <!-- Os cards serão gerados dinamicamente -->
+        </div>
+      </div>
+      <div id="grade" class="info-box" style="display: none;">
+        <h2>Grade de Aulas</h2>
+        <!-- filtro de pelotão -->
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+          <label for="filterPelotaoGrade">Filtrar por Pelotão:</label>
+          <select id="filterPelotaoGrade" class="input-style" style="width:80px;">
+            <option value="">Todos</option>
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+            <!-- ... adicione outros pelotões conforme necessário -->
+          </select>
+        </div>
+
+
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
+          <div id="calendar"></div>
+          <div style="flex: 1; display: flex; justify-content: center;">
+            <div id="conteudo-pdf">
+              <div id="aulasDoDia">Selecione um dia no calendário.</div>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <button id="baixar-imagem"
+                style="display:none; padding: 10px 15px; background-color: #b3d4fc; color: #003366; border: none; border-radius: 6px; cursor: pointer;">
+                📷 Baixar Imagem
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div id="sistemas" class="info-box" style="display: none;">
+        <h2>Sistemas Utilizados pela GCM</h2>
+        <p>Selecione um sistema para acessar:</p>
+
+        <div class="sistemas-grid">
+          <a href="https://sisgcm.guarulhos.sp.gov.br/public/index.php/login" target="_blank"
+            style="text-decoration: none;">
+            <div class="card-sistema" style="background-color: #1d3557;">
+              <i class="fas fa-shield-alt" style="font-size: 32px; margin-bottom: 10px;"></i>
+              <h3 style="margin-top: 10px;">SISGCM</h3>
+              <p style="font-size: 14px;">Sistema Integrado da Guarda Municipal</p>
+            </div>
+          </a>
+
+          <a href="https://cortex.mj.gov.br" target="_blank" style="text-decoration: none;">
+            <div class="card-sistema" style="background-color: #2a9d8f;">
+              <i class="fas fa-brain" style="font-size: 32px; margin-bottom: 10px;"></i>
+              <h3 style="margin-top: 10px;">CORTEX</h3>
+              <p style="font-size: 14px;">Sistema de análise e Inteligência Policial</p>
+            </div>
+          </a>
+
+          <a href="https://seguranca.sinesp.gov.br/sinesp-seguranca/login.jsf" target="_blank"
+            style="text-decoration: none;">
+            <div class="card-sistema" style="background-color: #457b9d;">
+              <i class="fas fa-database" style="font-size: 32px; margin-bottom: 10px;"></i>
+              <h3 style="margin-top: 10px;">SINESP</h3>
+              <p style="font-size: 14px;">Sistema Nacional de Informações de Segurança Pública</p>
+            </div>
+          </a>
+
+          <a href="https://agente.sinesp.gov.br/S" target="_blank" style="text-decoration: none;">
+            <div class="card-sistema" style="background-color: #e76f51;">
+              <i class="fas fa-mobile-alt" style="font-size: 32px; margin-bottom: 10px;"></i>
+              <h3 style="margin-top: 10px;">Agente de Campo</h3>
+              <p style="font-size: 14px;">Sistema para o dia a dia de operação policial</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div id="linksImportantes" class="info-box" style="display: none;">
+        <h2>Links Importantes</h2>
+        <p>Acesse documentos, legislações e sistemas</p>
+        <div class="link-grid">
+          <div class="link-card" onclick="abrirModalLink('documentos')" title="Ver Documentos Oficiais">
+            <div class="icon-area"><i class="fas fa-file-alt"></i></div>
+            <div class="text-area">
+              <h4>Documentos Oficiais</h4>
+              <p>Portarias, POPs e legislação</p>
+            </div>
+          </div>
+          <div class="link-card" onclick="abrirModalLink('prefeitura')" title="Acessar sites da Prefeitura">
+            <div class="icon-area"><i class="fas fa-university"></i></div>
+            <div class="text-area">
+              <h4>Prefeitura</h4>
+              <p>Sites e portais oficiais</p>
+            </div>
+          </div>
+          <div class="link-card" onclick="abrirModalLink('comunicacao')" title="Canais de Contato e Comunicação">
+            <div class="icon-area"><i class="fas fa-phone"></i></div>
+            <div class="text-area">
+              <h4>Comunicação</h4>
+              <p>Contatos e e-mails</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal genérico para exibir os links detalhados -->
+      <div id="modalLinks"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+        <div
+          style="background:white; padding:25px; border-radius:10px; max-width:600px; width:90%; max-height:90%; overflow-y:auto;">
+          <h3 id="modalLinksTitulo" style="color:#1d3557; margin-bottom:15px;"></h3>
+          <ul id="modalLinksLista" style="list-style: disc; padding-left: 25px;"></ul>
+          <div style="text-align:right; margin-top:20px;">
+            <button class="botao-gestao botao-fechar" onclick="fecharModalLink()"><i class="fas fa-times"></i>
+              Fechar</button>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção: Área de Liderança -->
+      <div id="lideranca" class="info-box" style="display: none;">
+        <h2>👨‍✈️ Área de Liderança</h2>
+        <p style="margin-bottom: 20px;">Bem-vindo(a) ao painel exclusivo para líderes de pelotão. Aqui você pode
+          organizar, comunicar e registrar as informações do seu pelotão.</p>
+        <!-- Tarefas do Dia -->
+        <div class="perfil-box">
+          <h3>📌 Tarefas do Dia</h3>
+          <ul style="list-style-type: disc; padding-left: 20px;">
+            <li>Registrar lista de presença do pelotão;</li>
+            <li>Enviar relatório diário;</li>
+          </ul>
+        </div>
+        <!-- Presença do Dia -->
+        <div class="perfil-box">
+          <h3>Registro de Presença</h3>
+          <div class="campo-form">
+            <label for="dataPresenca">📅 Data:</label>
+            <input type="date" id="dataPresenca" class="input-style" />
+          </div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f0f0f0;">
+                <th style="text-align: left; padding: 10px;">Nome de Guerra (QRA)</th>
+                <th style="text-align: center; padding: 10px;">Presente</th>
+                <th style="text-align: center; padding: 10px;">Justificativa (se faltou)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPresenca">
+              <!-- será preenchido dinamicamente -->
+            </tbody>
+          </table>
+          <div style="margin-top: 15px;">
+            <button id="btnPresenca" onclick="confirmarPresenca()"
+              style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">Registrar</button>
+            <span id="infoPelotao" style="margin-left: 15px; font-weight: bold; color: #1d3557;"></span>
+          </div>
+        </div>
+
+        <!-- Relatório Diário -->
+        <div class="perfil-box">
+          <h3>📝 Relatório Diário</h3>
+          <textarea id="mensagemRelatorio" placeholder="Registre situações ocorridas no pelotão..."
+            style="width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; height: 100px;"></textarea>
+          <button id="btnRelatorio" onclick="salvarRelatorio()"
+            style="margin-top: 10px; padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">Salvar
+            Relatório</button>
+        </div>
+
+        <!-- Recado para Coordenação -->
+        <div class="perfil-box">
+          <h3>📩 Comunicação com a Coordenação</h3>
+          <textarea id="mensagemRecado" placeholder="Digite seu recado..."
+            style="width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; height: 80px;"></textarea>
+          <button id="btnRecado" onclick="enviarRecado()"
+            style="margin-top: 10px; padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">Enviar
+            Recado</button>
+        </div>
+      </div>
+      <!-- Seção: ADMINISTRAÇÃO> APENAS MODIFICAÇÕES Importantes -->
+      <div id="controlePainel" class="info-box" style="display:none;">
+        <!-- 1) Gestão de Alunos -->
+        <h2>Gestão de Alunos</h2>
+        <div class="accordion-content">
+          <div style="margin: 15px 0;">
+            <input type="text" id="searchAluno" class="input-style" placeholder="Pesquisar por Pelotão ou QRA"
+              style="width:250px;" />
+          </div>
+          <div id="pelotoesContainer" class="disciplinas-grid" style="margin-bottom: 20px;">
+            <!-- Pelotões serão inseridos aqui -->
+          </div>
+          <div id="alunosContainer">
+            <!-- Alunos serão listados aqui -->
+          </div>
+        </div>
+
+        <!-- 2) Grade de Aulas -->
+        <h2>Grade de Aulas</h2>
+        <div class="accordion-content">
+          <div id="uploadGrade" class="info-box" style="margin-top: 20px;">
+            <div class="form-grid">
+              <label>
+                Data:
+                <input type="date" id="scheduleDate" class="input-style" style="width:150px;">
+              </label>
+              <label>
+                Pelotão:
+                <input type="text" id="schedulePelotao" class="input-style" maxlength="2" placeholder="01"
+                  style="width:50px;">
+              </label>
+              <label>
+                Arquivo:
+                <input type="file" id="scheduleFile" accept=".xlsx,xls,image/png,image/jpeg">
+              </label>
+              <button id="btnImportar" class="btn-exportar">Importar Grade</button>
+              <button id="btnRemover" class="btn-exportar btn-remover">Remover Grade</button>
+            </div>
+            <div id="previewGrade" style="margin-top:16px;"></div>
+          </div>
+        </div>
+
+        <!-- 3) Gestão de Disciplinas -->
+        <h2>Gestão de Disciplinas</h2>
+        <div class="accordion-content">
+          <div id="gestaoDisciplinasAdmin" class="info-box" style="margin-top: 20px;">
+            <div class="form-grid">
+              <label>Disciplina:
+                <select id="selectDisc" class="input-style">
+                  <option value="">Selecione uma disciplina</option>
+                </select>
+              </label>
+              <label>Professor:
+                <input type="text" id="inputProfessor" class="input-style">
+              </label>
+              <label>Pelotão:
+                <input type="text" id="inputPelotaoDisciplina" class="input-style" maxlength="2" placeholder="01">
+              </label>
+              <label>Carga Horária Atual:
+                <input type="number" id="inputCarga" class="input-style">
+              </label>
+              <label>Carga Horária Total:
+                <input type="number" id="inputCargaTotal" class="input-style">
+              </label>
+              <label>Material (Nome / URL):
+                <input type="text" id="inputMaterialNome" class="input-style" placeholder="Nome">
+                <input type="url" id="inputMaterialLink" class="input-style" placeholder="Link para PDF/Video">
+              </label>
+              <button id="btnAddDisciplina" class="btn-exportar">Adicionar Disciplina</button>
+              <button id="btnRemoveDisciplina" class="btn-exportar btn-remover">Remover Disciplina</button>
+              <button id="btnSaveDisciplina" class="btn-exportar">Salvar Disciplina</button>
+              <button id="btnAddMaterial" class="btn-exportar">Adicionar Material</button>
+              <button id="btnRemoveMaterial" class="btn-exportar btn-remover">Remover Material</button>
+              <button id="btnClearDisciplinas" class="btn-exportar">
+                🗑️ Excluir todas as disciplinas
+              </button>
+            </div>
+            <ul id="listaMateriais" style="margin-top:16px;"></ul>
+          </div>
+        </div>
+
+        <!-- 4) Avaliações -->
+        <h2>Avaliações</h2>
+        <div class="info-box" id="lancarProvasAdmin">
+          <h3>Lançar Nova Prova</h3>
+          <input type="text" id="disciplinaProva" placeholder="Nome da disciplina" class="input-style" />
+          <input type="text" id="pelotaoProva" placeholder="Pelotão (ex: 01)" maxlength="2" class="input-style" />
+          <input type="url" id="linkProva" placeholder="Link da prova (URL)" class="input-style" />
+          <button onclick="lancarProva()">Lançar Prova</button>
+          <hr style="margin: 25px 0;">
+
+          <h3>Encerrar Prova Existente</h3>
+          <select id="filtroPelotaoEncerrar" class="input-style" onchange="carregarProvasParaEncerrar()">
+            <option value="">Selecione o pelotão</option>
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+          </select>
+
+
+          <select id="filtroDisciplinaEncerrar" class="input-style" style="margin-top: 10px;">
+            <option value="">Selecione a disciplina</option>
+          </select>
+
+          <button onclick="encerrarProvaSelecionada()">Encerrar Prova</button>
+          <hr style="margin: 25px 0;">
+<!-- Lançar Notas -->
+            <h3>Lançar Notas e Frequência</h3>
+          <div id="filtrosLancamento" class="form-grid" style="margin-bottom: 20px;">
+            <label>Pelotão:
+              <select id="selectPelotao" class="input-style" onchange="carregarQRAsPorPelotao()">
+                <option value="">Carregando pelotões...</option>
+              </select>
+            </label>
+
+            <label>QRA do Aluno:
+              <select id="selectQRAAluno" class="input-style">
+                <option value="">Selecione um pelotão</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Disciplina:</label>
+          <select id="disciplinaSelect" class="input-style">
+            <option value="">Selecione uma disciplina</option>
+            <!-- Populado via JS -->
+          </select>
+
+          <label>Nota:</label>
+          <input type="number" id="notaValor" class="input-style" step="0.1" min="0" max="10">
+
+          <label>Frequência (%):</label>
+          <input type="number" id="frequenciaValor" class="input-style" step="1" min="0" max="100">
+
+          <button onclick="lancarNotaPorQRA()">Salvar Nota</button>
+          <hr style="margin: 25px 0;">
+
+          <!-- Editar Notas -->
+ <h3>Editar Notas e Frequência</h3>
+            <div class="form-grid">
+              <label>Disciplina:
+                <select id="selectDisciplinaNota" class="input-style" onchange="carregarNotaFrequenciaAluno()">
+                  <option value="">Selecione</option>
+                  <!-- populate via JS -->
+                </select>
+              </label>
+
+              <label>Nota:
+                <input type="number" id="inputNotaAluno" class="input-style" min="0" max="10" step="0.1" />
+              </label>
+
+              <label>Frequência (%):
+                <input type="number" id="inputFrequenciaAluno" class="input-style" min="0" max="100" />
+              </label>
+            </div>
+            <button onclick="salvarNotaFrequenciaAluno()" style="margin-top: 15px;" class="botao-gestao">
+              Salvar Alterações
+            </button>
+
+
+        </div>
+
+        <!-- Boletim -->
+<h2>Boletim</h2>
+        <div class="accordion-content">
+  <div class="form-grid" style="margin-bottom: 15px;">
+    <label>Pelotão:
+      <select id="selectPelotaoBoletim" class="input-style">
+        <option value="">Selecione</option>
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+      </select>
+    </label>
+    <label>Aluno:
+      <select id="selectAlunoBoletim" class="input-style" disabled>
+        <option value="">Selecione um pelotão</option>
+      </select>
+    </label>
+    <button id="btnVerBoletim" class="btn-exportar">🔍 Ver Boletim</button>
+    <button id="btnExportarBoletimInd" class="btn-exportar" style="display:none;">📄 Exportar PDF</button>
+  </div>
+
+  <div id="boletimAlunoContainer" class="boletim-grid">
+    <!-- Aqui aparece o boletim individual do aluno -->
+  </div>
+</div>
+        <!-- Boletim -->
+    
+        <h2>Central de Comunicados</h2>
+        <div id="central" style="display: none; margin-bottom: 20px;">
+          <!-- formulário de novo comunicado -->
+          <h3>Adicionar / Editar Comunicado</h3>
+          <div class="form-grid">
+            <label>Título:
+              <input type="text" id="comTitulo" class="input-style" />
+            </label>
+            <label>Data:
+              <input type="date" id="comData" class="input-style" />
+            </label>
+          </div>
+          <label>Conteúdo:
+            <textarea id="comConteudo" class="input-style" rows="4" placeholder="Digite aqui..."></textarea>
+          </label>
+          <button id="btnAddComunicado" class="btn-exportar">Adicionar Comunicado</button>
+          <hr style="margin:20px 0;" />
+          <!-- lista de comunicados existentes -->
+          <h3>Comunicados Existentes</h3>
+          <div id="listaComunicadosAdmin" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+          <!-- 4) Avisos -->
+  <h2>Avisos</h2>
+  <div class="accordion-content" style="display:none;">
+    <div class="form-grid">
+          <!-- FILTRO POR PELOTÃO -->
+    <label class="campo-label" style="grid-column: 1 / -1; display:flex; align-items:center; gap:8px;">
+      Pelotão:
+      <select id="selectPelotaoAvisos" class="input-style" style="width:100px;">
+        <option value="">Todos</option>
+      </select>
+    </label>
+
+      <label class="campo-label">
+        Aluno:
+        <select id="selectAlunoAvisos" class="input-style">
+          <option value="">Carregando...</option>
+        </select>
+      </label>
+      <label class="campo-label" style="grid-column:1/-1;">
+        Aviso:
+        <textarea id="textoAviso" class="input-style" rows="4" placeholder="Digite aqui o aviso..."></textarea>
+      </label>
+      <button id="btnEnviarAviso" class="botao-gestao">Enviar Aviso</button>
+    </div>
+  </div>
+
+        <!-- Submissões da Liderança -->
+        <h2 id="toggleLideranca">Submissões da Liderança</h2>
+        <div id="submissoesLiderancaAdmin" style="display:none;">
+            <!-- Definir Líder de Pelotão -->
+  <section>
+    <h3 class="accordion-header">🔑 Definir Líder de Pelotão</h3>
+    <div class="accordion-body" style="display: none; padding: 15px;">
+      <div class="form-grid">
+        <label>Pelotão:
+          <select id="selectPelotaoLider" class="input-style">
+            <option value="">Selecione</option>
+          </select>
+        </label>
+        <label>QRA do Líder:
+          <select id="selectQRALider" class="input-style">
+            <option value="">Selecione um pelotão</option>
+          </select>
+        </label>
+      </div>
+      <button id="btnDefinirLider"
+              class="btn-exportar"
+              style="margin-top: 12px;"
+              onclick="definirLider()">
+        Definir Líder
+      </button>
+          <button id="btnRemoverLider"
+            class="btn-exportar"
+            style="margin-top: 12px; margin-left: 8px;"
+            onclick="removerLider()">
+      Remover Líder
+    </button>
+
+    </div>
+  </section>
+
+          <!-- Listas de Presença agrupadas por mês -->
+          <section>
+            <h3 class="accordion-header">📋 Listas de Presença</h3>
+            <div class="accordion-body" id="listaPresencaAdmin"></div>
+          </section>
+          <!-- Relatórios Diários agrupados por mês -->
+          <section>
+            <h3 class="accordion-header">📝 Relatórios Diários</h3>
+            <div class="accordion-body" id="listaRelatoriosAdmin"></div>
+          </section>
+          <!-- Recados agrupados por mês -->
+          <section>
+            <h3 class="accordion-header">📩 Recados</h3>
+            <div class="accordion-body" id="listaRecadosAdmin"></div>
+          </section>
+        </div>
+ <!-- === Seção: Medidas Disciplinares === -->
+<h2>Medidas Disciplinares</h2>
+<div class="form-grid" id="medidasDisciplinaresSection" style="margin-bottom: 20px;">
+  <!-- Pelotão -->
+  <label class="campo-label">Pelotão:
+    <select id="selectPelotaoMedida" class="input-style">
+      <option value="">Carregando...</option>
+    </select>
+  </label>
+  <!-- Aluno -->
+  <label class="campo-label">Aluno:
+    <select id="selectAlunoMedida" class="input-style">
+      <option value="">Selecione um pelotão primeiro</option>
+    </select>
+  </label>
+  <!-- Medida -->
+  <label class="campo-label">Medida:
+    <select id="selectMedida" class="input-style">
+      <option value="">Selecione</option>
+      <!-- opções serão preenchidas via JS -->
+    </select>
+  </label>
+  <!-- Descrição -->
+  <label class="campo-label">Descrição:
+    <textarea id="descricaoMedida" class="input-style" rows="2" placeholder="Descreva o motivo da medida…"></textarea>
+  </label>
+</div>
+<button id="btnAplicarMedida" class="botao-gestao">Aplicar Medida</button>
+<!-- === Histórico de Medidas Aplicadas === -->
+<h3>Histórico de Medidas Disciplinares</h3>
+<div id="listaMedidas" class="lista-medidas">
+  <!-- Será preenchido dinamicamente -->
+</div>
+
+
+        <h2>Controle de Usuários</h2>
+        <div id="controle" style="display: none; margin-bottom: 20px;">
+          <button
+    class="btn-exportar"
+    style="padding:8px 16px; cursor:pointer;"
+    onclick="window.location.href='admin.html'">
+    Gerenciar Cadastros 
+  </button>
+        </div>
+      </div>
+      <div id="modalDisciplina"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:center;">
+        <div
+          style="background:white; padding:25px 30px; border-radius:12px; max-width:520px; width:90%; box-shadow:0 4px 12px rgba(0,0,0,0.2); position:relative;">
+          <button onclick="fecharModal()"
+            style="position:absolute; top:15px; right:20px; border:none; background:none; font-size:20px; cursor:pointer; color:#999;"><i
+              class="fas fa-times"></i></button>
+
+          <h2 id="modalTitulo" style="margin-bottom:10px; color:#1d3557;">📘 Disciplina</h2>
+
+          <p><strong>Professor:</strong> <span id="modalProfessor" style="color:#333;"></span></p>
+          <p><strong>Carga horária:</strong> <span id="modalCarga" style="color:#333;"></span></p>
+
+          <div style="margin-top: 20px;">
+            <strong>📚 Materiais:</strong>
+            <div id="modalMaterial" style="margin-top:8px;"></div>
+          </div>
+
+          <div style="margin-top: 25px;">
+            <strong>📈 Progresso:</strong>
+            <div style="width: 100%; background: #e9ecef; border-radius: 8px; margin-top: 8px; overflow: hidden;">
+              <div id="modalProgresso"
+                style="height: 14px; background-color: #1d3557; width: 0%; transition: width 0.4s;"></div>
+            </div>
+            <p id="modalProgressoTexto" style="font-size: 14px; margin-top: 5px; color: #555;"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function fecharModal() {
+        document.getElementById('modalDisciplina').style.display = 'none';
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <button id="btn-topo" onclick="scrollToTop()" title="Voltar ao topo">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Botão flutuante -->
+    <button id="btnContato" onclick="abrirFormulario()" title="Contato com a Escola">
+      ✉️
+    </button>
+
+    <!-- Popup do formulário -->
+    <div id="popupContato" class="popup-contato">
+      <h3>Fale com a Escola</h3>
+      <input type="text" id="contatoNome" placeholder="Seu QRA">
+      <input type="email" id="contatoEmail" placeholder="Seu email">
+      <textarea id="contatoMensagem" placeholder="Sua solicitação..."></textarea>
+      <div class="botoes-popup">
+        <button onclick="enviarEmail()">Enviar</button>
+        <button onclick="fecharFormulario()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  </div> <!-- fechamento da main-content -->
+  </div> <!-- fechamento da .container -->
+
+
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>EFAG - Escola de Formação e Aperfeiçoamento de Guardas &copy; 2025</p>
+      <p>Excelência na formação da segurança pública.</p>
+      <p><i class="fas fa-envelope"></i> efaggcm@guarulhos.sp.gov.br
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+  <div id="notificacao" style="
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #d4edda;
+  color: #155724;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 9999;
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 250px;
+">
+    ✅ Informações salvas com sucesso!
+  </div>
+  <!-- Modal de Informações do Aluno -->
+  <div id="modalAluno"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+    <div
+      style="background:white; padding:30px; border-radius:12px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative;">
+      <h3 id="modalTituloAluno" style="color:#1d3557; margin-bottom:20px;">Informações do Aluno</h3>
+
+      <div id="modalVisualizacaoAluno" style="line-height:1.6; color:#333;"></div>
+
+      <div id="modalEdicaoAluno" style="display:none;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <input id="editNome" class="input-style" placeholder="Nome Completo">
+          <input id="editQra" class="input-style" placeholder="QRA">
+          <input id="editCf" class="input-style" placeholder="CF">
+          <input id="editRe" class="input-style" placeholder="RE">
+          <input id="editPelotao" class="input-style" placeholder="Pelotão">
+          <input id="editEmail" class="input-style" placeholder="Email" readonly>
+          <input id="editCurso" class="input-style" placeholder="Curso">
+          <input id="editCpf" class="input-style" placeholder="CPF">
+          <input id="editNascimento" class="input-style" placeholder="Data de Nascimento">
+          <input id="editEndereco" class="input-style" placeholder="Endereço">
+          <input id="editTelefone" class="input-style" placeholder="Telefone">
+          <input id="editSangue" class="input-style" placeholder="Tipo Sanguíneo">
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: right;">
+        <button id="btnEditarAluno" onclick="entrarModoEdicao()">Editar</button>
+        <button id="btnSalvarAluno" onclick="salvarEdicaoAluno()" style="display:none;">Salvar</button>
+
+        <button onclick="fecharModalAluno()">Fechar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- No final do arquivo painel.html -->
+  <script src="script.js"></script>
+</body>
+
+</html>
